@@ -1,0 +1,46 @@
+name: portable-release-actions-workflow
+on:
+  push:
+    # Sequence of patterns matched against refs/tags
+    tags:
+      - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
+      - 'c*' # Push events to matching v*, i.e. v1.0, v20.15.10
+      
+jobs:
+  build:
+    name: Create Release
+    runs-on: windows-latest
+    env:
+      targetZip: gpower-portable-${{ github.ref_name }}.zip
+    steps:
+      - name: installer
+        shell: cmd
+        run: |
+          curl https://www.psychologie.hhu.de/fileadmin/redaktion/Fakultaeten/Mathematisch-Naturwissenschaftliche_Fakultaet/Psychologie/AAP/gpower/GPowerWin_3.1.9.7.zip -L --output installer.zip 
+          
+      - run: 7z.exe x installer.zip
+      
+      - name: lessmsi 
+        shell: cmd
+        run: | 
+          curl https://github.com/activescott/lessmsi/releases/download/v1.10.0/lessmsi-v1.10.0.zip -L --output lessmsi.zip && 7z.exe x lessmsi.zip -o"lessmsi"
+          
+      - name: uncompress
+        shell: cmd
+        run: |
+          mkdir "installation" &&^
+          .\lessmsi\lessmsi.exe x "GPower_3.1.9.7\GPowerSetup.msi" "installation\"
+          
+      - name: Archive Release
+        uses: thedoctor0/zip-release@master
+        with:
+          type: 'zip'
+          directory: "installation/SourceDir"
+          filename: "${{ env.targetZip }}"
+          
+      - name: Release prebuilt
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: "installation/SourceDir/${{ env.targetZip }}"
+          allowUpdates: true
+          token: ${{ secrets.GITHUB_TOKEN }}
