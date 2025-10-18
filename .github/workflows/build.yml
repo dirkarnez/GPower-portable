@@ -23,7 +23,8 @@ jobs:
         run: |
           curl https://www.psychologie.hhu.de/fileadmin/redaktion/Fakultaeten/Mathematisch-Naturwissenschaftliche_Fakultaet/Psychologie/AAP/gpower/GPowerWin_3.1.9.7.zip -L --output installer.zip 
           
-      - run: |
+      - shell: cmd
+        run: |
           7z.exe x installer.zip &&^
           ren GPower_3.1.9.7_143 installation
       
