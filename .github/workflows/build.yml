@@ -23,32 +23,34 @@ jobs:
         run: |
           curl https://www.psychologie.hhu.de/fileadmin/redaktion/Fakultaeten/Mathematisch-Naturwissenschaftliche_Fakultaet/Psychologie/AAP/gpower/GPowerWin_3.1.9.7.zip -L --output installer.zip 
           
-      - run: 7z.exe x installer.zip
+      - run: |
+          7z.exe x installer.zip &&^
+          ren GPower_3.1.9.7_143 installation
       
-      - name: lessmsi 
-        shell: cmd
-        run: | 
-          curl https://github.com/activescott/lessmsi/releases/download/v1.10.0/lessmsi-v1.10.0.zip -L --output lessmsi.zip && 7z.exe x lessmsi.zip -o"lessmsi"
+      # - name: lessmsi 
+      #   shell: cmd
+      #   run: | 
+      #     curl https://github.com/activescott/lessmsi/releases/download/v1.10.0/lessmsi-v1.10.0.zip -L --output lessmsi.zip && 7z.exe x lessmsi.zip -o"lessmsi"
           
-      - name: uncompress
-        shell: cmd
-        run: |
-          mkdir "installation" &&^
-          .\lessmsi\lessmsi.exe x "GPower_3.1.9.7\GPowerSetup.msi" "installation\"
+      # - name: uncompress
+      #   shell: cmd
+      #   run: |
+      #     mkdir "installation" &&^
+      #     .\lessmsi\lessmsi.exe x "GPower_3.1.9.7\GPowerSetup.msi" "installation\"
 
       - shell: cmd
-        run: xcopy /H /Y /C "GPowerNT.exe.Portable.cmd" "installation\SourceDir"
+        run: xcopy /H /Y /C "GPowerNT.exe.Portable.cmd" "installation"
           
       - name: Archive Release
         uses: thedoctor0/zip-release@master
         with:
           type: 'zip'
-          directory: "installation/SourceDir"
+          directory: "installation"
           filename: "${{ env.targetZip }}"
           
       - name: Release prebuilt
         uses: ncipollo/release-action@v1
         with:
-          artifacts: "installation/SourceDir/${{ env.targetZip }}"
+          artifacts: "installation/${{ env.targetZip }}"
           allowUpdates: true
           token: ${{ secrets.GITHUB_TOKEN }}
